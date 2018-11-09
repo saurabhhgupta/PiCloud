@@ -15,4 +15,15 @@ iCloud is the cloud service for Apple devices (i.e. iPhone), and since we're dea
 ## Is there any documentation available for this project?
 Yes, we will publish our project report upon completion of this project.
 
-Project created by Dr. Markus Mock, who is the instructor for this course.
+## Team Members
+Saurabh Gupta ([@saurabhhgupta](https://github.com/saurabhhgupta))
+<p align="center">
+  <img height="300px" src="https://github.com/saurabhhgupta/PiCloud/blob/master/pictures/saurabh.png"" alt="Saurabh Gupta Photo">
+</p>
+
+Brandon Pon ([@brandonapon](https://github.com/brandonapon))
+<p align="center">
+  <img height="300px" src="https://github.com/saurabhhgupta/PiCloud/blob/master/pictures/brandon.png"" alt="Brandon Pon Photo">
+</p>
+
+NOTE: Project created by Dr. Markus Mock, who is the instructor for this course.
