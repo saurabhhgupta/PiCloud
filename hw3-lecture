@@ -1,0 +1,62 @@
+HW 3 Lecture Notes - 11/14/2018
+_______________________________
+
+Overview:
+- HW1 -> verilog review, modelsim review, getting familiar with RISC-V
+- HW2 -> intro to the coverage concept, writing & testing coverpoints
+- HW3 -> using machine learning to generate assembly programs to hit a coverpoint, intro to scikit-learn & python
+
+HW3 Summary:
+- Main statement: use rule learning via decision trees to learn rules on how to hit each coverpoint
+- Example of the rules would be:
+	* ((Operand1 == 0) or (Operand2 == 0)) and (Instruction == 'MUL')
+	* This rule covers the MUL_OUTPUT_EQUALS_ZERO coverpoints
+
+- We need to...
+	- generate training data (bunch of assembly programs)
+	- define & extract features
+	- get labels
+	- perform rule learning
+	- verify rules
+
+HW3 Flow...
+	Assembly Generator --> RISC-V Verilog + coverage --> Labels (coverage results) --> RULE LEARNING (scikit-learn)
+			|
+			|
+			v
+		Features --> RULE LEARNING (scikit-learn)
+
+		(scikit-learn) RULE LEARING --> Rules --> Assembly Generator --> [VERIFY THAT RULES WORK] --> RISC-V Verilog + coverage
+
+** You need to extract features from the assembly programs (you'll get a bunch of 0's and 1's).
+
+
+- Assembly Program Template
+it will generate of programs following this template
+randomize only V1, V2, and I3
+
+V1, V2 Random Pool
+00000000
+0000ffff
+FFFF0000
+FFFFFFFF
+Random -ve number
+Random +ve number
+000000001 (overflow)
+
+I3 Random Pool
+SUB
+ADD
+MUL
+JAL
+BNE
+XOR
+
+
+(Most Challenging Part) Feature Selection <--- this is the key to any learning
+* Quality of the features determines quality of the learning
+* Try to select meaningful simple features
+	- V1 == 0, V2 == 0 are good features if you're looking for zero output
+	- V1 + V2 > FFFFFFFF can be useful in checking for overflow
+	- I3 = ADD, I3 == MUL, etc. are necessary features
+* Feature selection reflects your domain knowledge
