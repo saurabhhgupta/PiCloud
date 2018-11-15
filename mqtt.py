@@ -1,25 +1,31 @@
-#!/usr/bin/env python3
-
-import paho.mqtt.client as mqtt
 import time
+import paho.mqtt.client as mqtt
+import paho.mqtt.publish as publish
 
-# create client instance & connect to localhost
+broker = "xxx.xxx.x.xxx"
+sub_topic = "picloud/recv"
+pub_topic = "picloud/send"
+
+def on_connect(client, userdata, flags, rc):
+	print("Connected with result code " + str(rc))
+	client.subscribe(sub_topic)
+
+def on_message(client, userdata, msg):
+	message = str(msg.payload)
+	print(msg.topic + " " + message)
+	# display_sensehat(message)
+
+def on_publish(mosq, obj, mid):
+	print("mid: " + str(mid))
+
 client = mqtt.Client()
-client.connect("localhost", 1883, 60)
+client.on_connect = on_connect
+client.on_message = on_message
+client.connect(broker, 1883, 60)
+client.loop_start()
 
-# publish message to topic/iopi and set pin 1 on bus 1 to ON
-client.publish("topic/iopi", "1,1");
-time.sleep(2)
-
-# publish message to topic/iopi and set pin 1 on bus 1 to OFF
-client.publish("topic/iopi", "1,0");
-time.sleep(2)
-
-# publish message to topic/iopi and set pin 1 on bus 2 to ON
-client.publish("topic/iopi", "17,1");
-time.sleep(2)
-
-# publish message to topic/iopi and set pin 1 on bus 2 to OFF
-client.publish("topic/iopi", "17,0");
-
-client.disconnect();
+while True:
+	# packetize everything into an array
+	PACKETIZED_DATA = []
+	client.publish(pub_topic, str(PACKETIZED_DATA))
+	time.sleep(1*60)
