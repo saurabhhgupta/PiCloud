@@ -5,6 +5,7 @@ import time
 import threading
 import paho.mqtt.publish as publish
 
+from mqtt import *
 from helper import *
 from timestamp import timestamp
 
@@ -26,10 +27,21 @@ def display_gpu_temp():
 	global INTERVAL
 	print(measure_gpu())
 
+packetized_data = []
 def main():
 	# Step 1.
 	threading.Timer(INTERVAL, main).start()
-	print(timestamp(), measure_cpu(), measure_gpu())
+	packetized_data.append(measure_cpu())
+	# print(timestamp(), measure_cpu(), measure_gpu())
+
+	client = mqtt.Client()
+	client.on_connect = on_connect
+	client.on_message = on_message
+	client.connect(broker, 1883, 60)
+	client.loop_start()
+
+	client.publish(TOPIC, str(packetized_data))
+	time.sleep(1*60)
 
 if __name__ == '__main__':
 	main()
