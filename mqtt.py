@@ -1,9 +1,11 @@
-import time
-import paho.mqtt.client as mqtt
-import paho.mqtt.publish as publish
+from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
 
-broker = "192.168.0.22"
-TOPIC = "picloud/final"
+import time
+# import paho.mqtt.client as mqtt
+# import paho.mqtt.publish as publish
+
+broker = "ahuv6nrfa9swh-ats.iot.us-east-2.amazonaws.com"
+TOPIC = "finalproj/test"
 
 def on_connect(client, userdata, flags, rc):
 	print("Connected with result code " + str(rc))
