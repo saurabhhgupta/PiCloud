@@ -3,14 +3,18 @@
 import os
 import time
 import threading
-# import paho.mqtt.publish as publish
+import json
+import sched
 
 from mqtt import *
 from helper import *
 from timestamp import timestamp
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
 
-INTERVAL = 3.0
+TIME_INTERVAL = 5.0
+SLEEP_INTERVAL = 1.0
+s = sched.scheduler(time.time, time.sleep)
+temperatures = {}
 
 def measure_cpu():
 	temp = os.popen("cat /sys/class/thermal/thermal_zone0/temp").readline()
@@ -20,49 +24,36 @@ def measure_gpu():
 	temp = os.popen("vcgencmd measure_temp").readline()
 	return float((temp.replace("temp=", "").replace("'C", "")))
 
-def display_cpu_temp():
-	global INTERVAL
-	print(measure_cpu())
+def measure_both(sc, client):
+	global temperatures
 
-def display_gpu_temp():
-	global INTERVAL
-	print(measure_gpu())
+	client.connect()
+	print "connect client... done."
 
-packetized_data = []
+	temperatures["CPU"] = measure_cpu()
+	temperatures["GPU"] = measure_gpu()
+#	send_packet = (measure_cpu(), measure_gpu())
+	json_send_packet = json.dumps(temperatures)
+
+	client.publish("picloud/test", json_send_packet, 0)
+	print "publishing... done."
+
+	s.enter(TIME_INTERVAL, SLEEP_INTERVAL, measure_both, (sc, client))
+
+	client.disconnect()
+	print "disconnect client... done."
+
 def main():
-        client = AWSIoTMQTTClient("test_client")
-        client.configureEndpoint("ahuv6nrfa9swh-ats.iot.us-east-2.amazonaws.com", 8883)
-        client.configureCredentials("AmazonRootCA1.pem", "c4a552c0e6-private.pem.key", "c4a552c0e6-certificate.pem.crt")
-        # client.configureOfflinePublishQueueing(-1)
-        # client.configureDrainingFrequency(2)
-        # client.configureConnectDisconnectTimeout(10)
-        # client.configureMQTTOperationTimeout(5)
+	global s
+	print "create client... done."
+        client = AWSIoTMQTTClient("PiCloudy")
+        print "configuring endpoint... done."
+	client.configureEndpoint("ahuv6nrfa9swh-ats.iot.us-west-2.amazonaws.com", 8883)
+        print "configure credentials... done."
+	client.configureCredentials("AmazonRootCA1.pem", "Certificates/3fb5119996-private.pem.key", "Certificates/3fb5119996-certificate.pem.crt")
 
-	# Step 1.
-	# threading.Timer(INTERVAL, main).start()
-	# packetized_data.append(measure_cpu())
-	# print(timestamp(), measure_cpu(), measure_gpu())
-
-
-
-        '''
-	client = mqtt.Client()
-	client.on_connect = on_connect
-	client.on_message = on_message
-	client.connect(broker, 1883, 60)
-	client.loop_start()
-        '''
-
-#	client.publish(TOPIC, str(packetized_data))
-        client.connect()
-        print "connected"
-	
-        client.subscribe("finalproj/test", 1, "gay")
-        #client.publish("finalproj/test", "brandon if you see this, call me a bitch rn", 0)
-        client.publish("finalproj/test", str(measure_gpu()), 0)
-	print "published"
-        client.disconnect()
-        # time.sleep(1*60)
+        s.enter(TIME_INTERVAL, SLEEP_INTERVAL, measure_both, (s, client))
+	s.run()
 
 if __name__ == '__main__':
 	main()
