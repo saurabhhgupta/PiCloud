@@ -5,7 +5,7 @@ import time
 # import paho.mqtt.publish as publish
 
 broker = "ahuv6nrfa9swh-ats.iot.us-east-2.amazonaws.com"
-TOPIC = "finalproj/test"
+TOPIC = "picloud/test"
 
 def on_connect(client, userdata, flags, rc):
 	print("Connected with result code " + str(rc))

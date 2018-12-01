@@ -33,27 +33,28 @@ def celsius_to_fahrenheit(value):
 
 def threaded(scheduler, client, connection_count):
 	global packet
+        connection_count += 1
 
 	client.connect()
 	print "[{}] Connecting client... done.".format(connection_count)
 
-	temperatures["timestamp"] =  time.strftime("%Y-%m-%d %H:%M:%S", timestamp)
-	temperatures["CPU"] = measure_cpu()
-	temperatures["GPU"] = measure_gpu()
+	timestamp = time.localtime()
+        packet["timestamp"] =  time.strftime("%Y-%m-%d %H:%M:%S", timestamp)
+	packet["CPU"] = measure_cpu()
+	packet["GPU"] = measure_gpu()
 	send_packet = json.dumps(packet)
 
 	client.publish(topic, send_packet, 0)
-	print "publishing... done."
+	print "[{}] Publishing... done.".format(connection_count)
 
-	function_scheduler.enter(TIME_INTERVAL, SLEEP_INTERVAL, measure_both, (scheduler, client, connection_count))
+	function_scheduler.enter(TIME_INTERVAL, SLEEP_INTERVAL, threaded, (scheduler, client, connection_count))
 
 	client.disconnect()
 	print "[{}] Disconnecting client... done.".format(connection_count)
-	connection_count += 1
 
 def main():
 	global function_scheduler
-	connection_count = 1
+	connection_count = 0
 
 	print "Starting PiCloud."
 	print "Creating client... done."
@@ -64,7 +65,7 @@ def main():
 	client.configureCredentials("AmazonRootCA1.pem", "Certificates/3fb5119996-private.pem.key", "Certificates/3fb5119996-certificate.pem.crt")
 
         function_scheduler.enter(TIME_INTERVAL, SLEEP_INTERVAL, threaded, (function_scheduler, client, connection_count))
-	function_scheduler.run()
+        function_scheduler.run()
 
 if __name__ == '__main__':
 	main()
